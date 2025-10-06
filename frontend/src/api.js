@@ -32,4 +32,31 @@ export async function createProperty(payload) {
     return response.json();
 }
 
+export async function getPropertyById(id) {
+    const response = await fetch(`${API_BASE}/property/${id}`);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch property: ${response.status}`);
+    }
+    return response.json();
+}
+export async function updateProperty(id, payload) {
+    const response = await fetch(`${API_BASE}/property/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to update property: ${response.status}`);
+    }
+    return response.json();
+}
 
+export async function deleteProperty(id) {
+    const response = await fetch(`${API_BASE}/property/${id}`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to delete property: ${response.status}`);
+    }
+    return response.json();
+}

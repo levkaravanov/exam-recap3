@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PropertyListing from "./PropertyListing";
 import { getProperties } from "../api";
+import { Link } from "react-router-dom";
 
 const PropertyListings = () => {
   const [properties, setProperties] = useState([]);
@@ -32,7 +33,9 @@ const PropertyListings = () => {
   return (
     <div className="property-list">
       {properties.map((p) => (
-        <PropertyListing key={p.id || p._id} property={p} />
+        <Link key={p.id || p._id} to={`/property/${p.id || p._id}`}>
+          <PropertyListing property={p} />
+        </Link>
       ))}
     </div>
   );
