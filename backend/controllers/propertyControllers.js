@@ -1,4 +1,4 @@
-const Property = require("../models/PropertyModel");
+const Property = require("../models/propertyModel");
 const mongoose = require("mongoose");
 
 //GET / Properties;
