@@ -11,24 +11,24 @@ const Login = ({ setIsAuthenticated }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    await login({ username: username.value, password: password.value });
-    if (!error) {
+    const logged = await login({ username: username.value, password: password.value });
+    if (logged) {
       console.log("success");
       setIsAuthenticated(true);
       navigate("/");
     }
   };
 
-
   return (
     <div className="create">
       <h2>Login</h2>
       <form onSubmit={handleFormSubmit}>
-      <label>username:</label>
+        <label>Username:</label>
         <input {...username} />
         <label>Password:</label>
         <input {...password} />
-        <button>Sign up</button>
+        <button>Login</button>
+        {error && <p style={{ color: "red" }}>Error: {error}</p>}
       </form>
     </div>
   );

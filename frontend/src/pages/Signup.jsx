@@ -20,22 +20,23 @@ const Signup = ({ setIsAuthenticated }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    await signup({
+    const created = await signup({
       username: username.value,
       password: password.value,
       name: name.value,
       phone_number: phoneNumber.value,
-      profile_picture: profilePicture.value,
+      profilePicture: profilePicture.value,
       gender: gender.value,
       date_of_birth: dateOfBirth.value,
+      role: role.value || "user",
       address: {
         street: addressStreet.value,
         city: addressCity.value,
         state: addressState.value,
-        zip: addressZip.value,
+        zipCode: addressZip.value,
       },
     });
-    if (!error) {
+    if (created) {
       console.log("success");
       setIsAuthenticated(true);
       navigate("/");

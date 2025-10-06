@@ -5,17 +5,19 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
     setIsAuthenticated(false);
     localStorage.removeItem("user");
   };
+  const userJson = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+  const user = userJson ? JSON.parse(userJson) : null;
 
   return (
     <nav className="navbar">
       <Link to="/">
-        <h1>React Jobs</h1>
+        <h1>React Property Search</h1>
       </Link>
       <div className="links">
         {isAuthenticated && (
           <div>
-            <Link to="/jobs/add-job">Add Job</Link>
-            <span>{JSON.parse(localStorage.getItem("user")).username}</span>
+            <Link to="/add-property">Add Property</Link>
+            <span>{user?.username || ""}</span>
             <button onClick={handleClick}>Log out</button>
           </div>
         )}

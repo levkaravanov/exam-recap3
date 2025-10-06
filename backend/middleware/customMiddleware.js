@@ -4,11 +4,8 @@ const unknownEndpoint = (request, response) => {
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message);
-
-  response.status(500);
-  response.json({
-    message: error.message,
-  });
+  const status = response.statusCode && response.statusCode !== 200 ? response.statusCode : 500;
+  response.status(status).json({ message: error.message });
 };
 
 const requestLogger = (req, res, next) => {

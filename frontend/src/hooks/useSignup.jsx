@@ -12,17 +12,19 @@ export default function useSignup(url) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(object),
     });
-    const user = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
-      console.log(user.error);
-      setError(user.error);
+      const message = data?.message || data?.error || "Signup failed";
+      console.log(message);
+      setError(message);
       setIsLoading(false);
-      return error;
+      return null;
     }
 
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("user", JSON.stringify(data));
     setIsLoading(false);
+    return data;
   };
 
   return { signup, isLoading, error };
