@@ -1,43 +1,38 @@
+import { useEffect, useState } from "react";
 import PropertyListing from "./PropertyListing";
+import { getProperties } from "../api";
 
 const PropertyListings = () => {
-  const properties = [
-    {
-      id: "1",
-      title: "Cozy apartment",
-      type: "apartment",
-      description: "Nice place",
-      price: 1200,
-      location: {
-        address: "123 Main",
-        city: "Helsinki",
-        state: "Uusimaa",
-        zipCode: "00100",
-      },
-      squareFeet: 550,
-      yearBuilt: 1998,
-    },
-    {
-      id: "2",
-      title: "Spacious house",
-      type: "house",
-      description: "Family home",
-      price: 3200,
-      location: {
-        address: "456 Oak",
-        city: "Espoo",
-        state: "Uusimaa",
-        zipCode: "02100",
-      },
-      squareFeet: 1500,
-      yearBuilt: 2008,
-    },
-  ];
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    // Load properties from backend API
+    getProperties()
+      .then((data) => {
+        if (!isMounted) return;
+        setProperties(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        setError(err.message || "Failed to load properties");
+        setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) return <div className="property-list">Loading properties...</div>;
+  if (error) return <div className="property-list">Error: {error}</div>;
 
   return (
     <div className="property-list">
       {properties.map((p) => (
-        <PropertyListing key={p.id} property={p} />
+        <PropertyListing key={p.id || p._id} property={p} />
       ))}
     </div>
   );
