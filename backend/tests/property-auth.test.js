@@ -6,38 +6,67 @@ const Property = require("../models/propertyModel");
 
 // Seed data for tests
 const properties = [
-  {"title": "Convenient Family Apartment",
-  "type": "Apartment",
-  "description": "A lovely apartment in the city center.",
-  "price": 2200,
-  "location": {
-    "address": "Random street 123",
-    "city": "Random City",
-    "state": "Random State",
-    "zipCode": "12345"
+  {
+    "title": "Convenient Family Apartment",
+    "type": "Apartment",
+    "description": "A lovely apartment in the city center.",
+    "price": 2200,
+    "location": {
+      "address": "Random street 123",
+      "city": "Random City",
+      "state": "Random State",
+      "zipCode": "12345"
+    },
+    "squareFeet": 20,
+    "yearBuilt": 1990
   },
-  "squareFeet": 20,
-  "yearBuilt":1990 
-},
-  {"title": "Cozy Country Cottage",
-  "type": "Cottage",
-  "description": "A quaint cottage in the countryside.",
-  "price": 1800,
-  "location": {
-    "address": "Random street 456",
-    "city": "Random City",
-    "state": "Random State",
-    "zipCode": "12345"
+  {
+    "title": "Cozy Country Cottage",
+    "type": "Cottage",
+    "description": "A quaint cottage in the countryside.",
+    "price": 1800,
+    "location": {
+      "address": "Random street 456",
+      "city": "Random City",
+      "state": "Random State",
+      "zipCode": "12345"
+    },
+    "squareFeet": 20,
+    "yearBuilt": 1990
   },
-  "squareFeet": 20,
-  "yearBuilt":1990 
-},
 ];
 
 // Reset the tours collection before each test
+let token;
+
 beforeEach(async () => {
   await Property.deleteMany({});
   await Property.insertMany(properties);
+
+  // Ensure a user exists and obtain JWT
+  const signupPayload = {
+    name: "Jane Doe",
+    username: "jane_doe",
+    password: "Passw0rd!23",
+    phone_number: "+358401234567",
+    gender: "female",
+    date_of_birth: "1995-05-20",
+    role: "user",
+    address: {
+      street: "123 Main St",
+      city: "Helsinki",
+      state: "Uusimaa",
+      zipCode: "00100",
+    },
+    profilePicture: "https://example.com/avatar.jpg",
+  };
+
+  await api.post("/api/users/signup").send(signupPayload); // ignore 400 if already exists
+  const loginRes = await api
+    .post("/api/users/login")
+    .send({ username: signupPayload.username, password: signupPayload.password })
+    .expect(200);
+  token = loginRes.body.token;
 });
 
 // ---------------- GET ----------------
@@ -72,23 +101,44 @@ describe("GET /api/property/:id", () => {
 
 // ---------------- POST ----------------
 describe("POST /api/property", () => {
-  it("should create a new property", async () => {
-    const newProperty = {"title": "Modern Beachside Villa",
-  "type": "Villa",
-  "description": "A luxurious villa by the beach.",
-  "price": 3000,
-  "location": {
-    "address": "Random street 456",
-    "city": "Random City",
-    "state": "Random State",
-    "zipCode": "12345"
-  },
-  "squareFeet": 20,
-  "yearBuilt":1990 
-};
+  it("should return 401 without token", async () => {
+    const newProperty = {
+      "title": "Modern Beachside Villa",
+      "type": "Villa",
+      "description": "A luxurious villa by the beach.",
+      "price": 3000,
+      "location": {
+        "address": "Random street 456",
+        "city": "Random City",
+        "state": "Random State",
+        "zipCode": "12345"
+      },
+      "squareFeet": 20,
+      "yearBuilt": 1990
+    };
+
+    await api.post("/api/property").send(newProperty).expect(401);
+  });
+
+  it("should create a new property with valid token", async () => {
+    const newProperty = {
+      "title": "Modern Beachside Villa",
+      "type": "Villa",
+      "description": "A luxurious villa by the beach.",
+      "price": 3000,
+      "location": {
+        "address": "Random street 456",
+        "city": "Random City",
+        "state": "Random State",
+        "zipCode": "12345"
+      },
+      "squareFeet": 20,
+      "yearBuilt": 1990
+    };
 
     const response = await api
       .post("/api/property")
+      .set("Authorization", `Bearer ${token}`)
       .send(newProperty)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -102,12 +152,19 @@ describe("POST /api/property", () => {
 
 // ---------------- PUT ----------------
 describe("PUT /api/property/:id", () => {
-  it("should update a property with partial data", async () => {
+  it("should return 401 without token", async () => {
+    const property = await Property.findOne();
+    const updatedProperty = { description: "Updated description", price: 2500 };
+    await api.put(`/api/property/${property._id}`).send(updatedProperty).expect(401);
+  });
+
+  it("should update a property with token", async () => {
     const property = await Property.findOne();
     const updatedProperty = { description: "Updated description", price: 2500 };
 
     const response = await api
       .put(`/api/property/${property._id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(updatedProperty)
       .expect(200)
       .expect("Content-Type", /application\/json/);
@@ -121,15 +178,27 @@ describe("PUT /api/property/:id", () => {
 
   it("should return 400 for invalid property ID", async () => {
     const invalidId = "12345"; // invalid format, not a valid ObjectId
-    await api.put(`/api/property/${invalidId}`).send({}).expect(400);
+    await api
+      .put(`/api/property/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
   });
 });
 
 // ---------------- DELETE ----------------
 describe("DELETE /api/property/:id", () => {
-  it("should delete a property by ID", async () => {
+  it("should return 401 without token", async () => {
     const property = await Property.findOne();
-    await api.delete(`/api/property/${property._id}`).expect(200);
+    await api.delete(`/api/property/${property._id}`).expect(401);
+  });
+
+  it("should delete a property by ID with token", async () => {
+    const property = await Property.findOne();
+    await api
+      .delete(`/api/property/${property._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
 
     const deletedPropertyCheck = await Property.findById(property._id);
     expect(deletedPropertyCheck).toBeNull();
@@ -137,7 +206,10 @@ describe("DELETE /api/property/:id", () => {
 
   it("should return 400 for invalid property ID", async () => {
     const invalidId = "12345"; // invalid format
-    await api.delete(`/api/property/${invalidId}`).expect(400);
+    await api
+      .delete(`/api/property/${invalidId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(400);
   });
 });
 
