@@ -102,6 +102,32 @@
   cursor: pointer;
 }
 
+/* utility buttons */
+.btn {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: #fff;
+  margin-right: 8px;
+}
+
+.btn-secondary {
+  background: #7f8c8d;
+  color: #fff;
+}
+
+.actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
 /* create new property form */
 .create {
   max-width: 400px;

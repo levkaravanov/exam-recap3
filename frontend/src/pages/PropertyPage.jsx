@@ -59,7 +59,7 @@ const PropertyPage = ({ isAuthenticated }) => {
   };
 
   return (
-    <div className="job-preview">
+    <div className="property-details">
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
@@ -72,18 +72,18 @@ const PropertyPage = ({ isAuthenticated }) => {
           <p>Address: {property.location.address}</p>
           <p>City: {property.location.city}</p>
           <p>State: {property.location.state}</p>
-            <p>Zip Code: {property.location.zipCode}</p>
-            <p>Price: ${property.price}</p>
-            <p>Square Feet: {property.squareFeet}</p>
-            <p>Year Built: {property.yearBuilt}</p>
+          <p>Zip Code: {property.location.zipCode}</p>
+          <p>Price: ${property.price}</p>
+          <p>Square Feet: {property.squareFeet}</p>
+          <p>Year Built: {property.yearBuilt}</p>
 
           {isAuthenticated && (
-            <>
-              <button onClick={() => onDeleteClick(property._id)}>delete</button>
-              <button onClick={() => navigate(`/edit-property/${property._id}`)}>
-                edit
+            <div className="actions">
+              <button className="btn btn-danger" onClick={() => onDeleteClick(property._id)}>Delete</button>
+              <button className="btn btn-secondary" onClick={() => navigate(`/edit-property/${property._id}`)}>
+                Edit
               </button>
-            </>
+            </div>
           )}
         </>
       )}
